@@ -4,6 +4,7 @@ Chunked files writer and reader (Can read, for example, S.T.A.L.K.E.R's all.spaw
 
 Chunked file usually consists of blocks like following:
 `index:T size:T data:[size]`
+
 In case of S.T.A.L.K.E.R.'s `all.spawn`, T will be UInt32
 
 ## Installation
