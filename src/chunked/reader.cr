@@ -47,5 +47,14 @@ module Chunked
     def current_chunk_data(cdata : ChunkInfo(T,T))
       return {info: cdata, offset: offset}
     end
+
+    def chunk(&block : Proc(IORange, Void))
+      cinfo = open_chunk
+      begin
+        block.call(IORange.new(@io, UInt64.unsafe_cast(offset), UInt64.unsafe_cast(cinfo.size)))
+      ensure
+        close_chunk
+      end
+    end
   end
 end

@@ -112,6 +112,17 @@ describe Chunked do
     reader.close
   end
 
+  it "reads chunks with blocks" do
+    reader = Reader32.new(File.open(TMP32), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    reader.chunk do |io|
+      io.gets_to_end.bytes.should eq([1u8,2u8,3u8])
+    end
+    reader.chunk do |io|
+      io.gets_to_end.bytes.should eq([4u8,5u8,6u8])
+    end
+    reader.close
+  end
+
   it "indexes chunks" do
     reader = IReader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
     reader.index_chunks!
