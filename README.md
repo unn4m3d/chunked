@@ -27,7 +27,7 @@ require "chunked"
 
 reader = Chunked::IndexedReader(UInt32).new("path/to/all.spawn")
 reader.index_chunks!
-reader.chunks #=> [{size: 3, offset: 8, index: 0},{size: 3, offset: 19, index: 1}]
+reader.chunks #=> [0 => {size: 3, offset: 8, index: 0},1 => {size: 3, offset: 19, index: 1}, ...]
 reader[0] #=> Bytes[1u8,2u8,3u8]
 reader.info(0) #=> {size: 3, offset: 8, index: 0}
 reader.close
