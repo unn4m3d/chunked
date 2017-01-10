@@ -1,5 +1,7 @@
 # chunked
 
+[![Build Status](https://travis-ci.org/unn4m3d/chunked.svg?branch=master)](https://travis-ci.org/unn4m3d/chunked)
+
 Chunked files writer and reader (Can read, for example, S.T.A.L.K.E.R's all.spawn)
 
 Chunked file usually consists of blocks like following:
