@@ -1,14 +1,22 @@
 module Chunked
   class IORange
     include IO
+    include IO::Positional
 
-    @parent : IO::FileDescriptor
+    @parent : IO::Positional
     @start : UInt64
     @size : UInt64
     @pos = 0u64
 
     getter size
-    property pos
+
+    def pos=(t)
+      @pos = UInt64.unsafe_cast(t)
+    end
+
+    def pos
+      @pos
+    end
 
     def initialize(@parent,@start,@size)
     end

@@ -25,7 +25,7 @@ module Chunked
       pos = offset
       _offset = start - sizeof(T)
       debug "New offset is #{_offset}"
-      self.offset = _offset
+      self.offset = self.offset.class.unsafe_cast _offset
       debug "Writing size #{pos - start}"
       @io.write_bytes(T.unsafe_cast(pos-start), IO::ByteFormat::LittleEndian)
       debug "Returning back to #{pos}"

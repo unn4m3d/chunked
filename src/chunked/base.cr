@@ -1,7 +1,7 @@
 require "./chunk_info"
 module Chunked
   class Base(T)
-    @io : IO::FileDescriptor
+    @io : IO::Positional
 
     def initialize(@io, @debug : Bool = false)
       @start_offsets = Array(T).new
