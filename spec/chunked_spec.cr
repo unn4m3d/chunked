@@ -140,4 +140,13 @@ describe Chunked do
     reader.info(0i32)[:index].should eq(0)
     reader[0i32].to_a.should eq([1u8,2u8,3u8])
   end
+
+  it "iterates through chunks" do
+    reader = Reader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    reader.each_chunk do |io, chk|
+      io.size.should eq(chk.size)
+      io.size.should eq(3i64)
+      io.gets_to_end.bytes.should eq([1u8,2u8,3u8].map{ |x| x + 3*chk.index })
+    end
+  end
 end

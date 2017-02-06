@@ -10,6 +10,14 @@ module Chunked
       cdata
     end
 
+    def open_chunk?
+      begin
+        open_chunk
+      rescue e : IO::EOFError
+        nil
+      end
+    end
+
     def close_chunk
       sp = @start_offsets.pop
       ep = @end_offsets.pop
@@ -54,6 +62,17 @@ module Chunked
         block.call(IORange.new(@io, UInt64.unsafe_cast(offset), UInt64.unsafe_cast(cinfo.size)))
       ensure
         close_chunk
+      end
+    end
+
+    def each_chunk(&proc : Proc(IORange, ChunkInfo(T,T), Void))
+      while cinfo = open_chunk?
+        begin
+          cin = cinfo.not_nil!
+          proc.call(IORange.new(@io, UInt64.unsafe_cast(offset), UInt64.unsafe_cast(cin.size)), cin)
+        ensure
+          close_chunk
+        end
       end
     end
   end
