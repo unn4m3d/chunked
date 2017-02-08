@@ -1,14 +1,5 @@
 require "./spec_helper"
 
-alias Writer = Chunked::Writer(Int64)
-alias Writer32 = Chunked::Writer(UInt32)
-alias Reader = Chunked::Reader(Int64)
-alias Reader32 = Chunked::Reader(Int32)
-alias IReader = Chunked::IndexedReader(Int64)
-alias IReader32 = Chunked::IndexedReader(Int32)
-TMP = Tempfile.new("chunked").path
-TMP32 = Tempfile.new("chunked32").path
-
 describe Int do
   it "crops" do
     dword = 0x01020304i32
@@ -27,7 +18,7 @@ describe Int do
   end
 end
 
-describe Chunked do
+describe Chunked::Writer do
 
 
   it "writes data" do
@@ -84,6 +75,9 @@ describe Chunked do
     ])
   end
 
+end
+
+describe Chunked::Reader do
   it "reads data" do
     reader = Reader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
     cdata = reader.open_chunk
@@ -123,24 +117,6 @@ describe Chunked do
     reader.close
   end
 
-  it "indexes chunks" do
-    reader = IReader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
-    reader.index_chunks!
-    reader.info(0i64)[:size].should eq(3)
-    reader.info(1i64)[:size].should eq(3)
-    reader.info(0i64)[:index].should eq(0)
-    reader[0i64].to_a.should eq([1u8,2u8,3u8])
-  end
-
-  it "indexes chunks using other integral types" do
-    reader = IReader32.new(File.open(TMP32), debug: ENV.has_key?("CHUNKED_DEBUG"))
-    reader.index_chunks!
-    reader.info(0i32)[:size].should eq(3)
-    reader.info(1i32)[:size].should eq(3)
-    reader.info(0i32)[:index].should eq(0)
-    reader[0i32].to_a.should eq([1u8,2u8,3u8])
-  end
-
   it "iterates through chunks" do
     reader = Reader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
     reader.each_chunk do |io, chk|
@@ -149,4 +125,26 @@ describe Chunked do
       io.gets_to_end.bytes.should eq([1u8,2u8,3u8].map{ |x| x + 3*chk.index })
     end
   end
+end
+
+describe Chunked::IndexedReader do
+
+  it "indexes chunks" do
+    reader = IReader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    reader.index_chunks!
+    reader.info(0i64)[:size].should eq(3)
+    reader.info(1i64)[:size].should eq(3)
+    reader.info(0i64)[:index].should eq(0)
+    reader[0i64].gets_to_end.bytes.should eq([1u8,2u8,3u8])
+  end
+
+  it "indexes chunks using other integral types" do
+    reader = IReader32.new(File.open(TMP32), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    reader.index_chunks!
+    reader.info(0i32)[:size].should eq(3)
+    reader.info(1i32)[:size].should eq(3)
+    reader.info(0i32)[:index].should eq(0)
+    reader[0i32].gets_to_end.bytes.should eq([1u8,2u8,3u8])
+  end
+
 end

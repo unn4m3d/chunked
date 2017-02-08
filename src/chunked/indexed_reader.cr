@@ -24,12 +24,9 @@ module Chunked
 
     def [](index : T)
       raise "No chunk #{index} found" unless @chunks.has_key? index
-      pos = @io.pos
-      @io.pos = @chunks[index][:offset]
-      slice = Bytes.new(@chunks[index][:size])
-      @io.read(slice)
-      @io.pos = pos
-      slice
+      offset = @chunks[index][:offset]
+      size = @chunks[index][:size]
+      IORange.new(@io, UInt64.unsafe_cast(offset), UInt64.unsafe_cast(size))
     end
 
     def info(index : T)
