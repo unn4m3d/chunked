@@ -15,7 +15,7 @@ module Chunked
       @start_offsets << offset
     end
 
-    delegate write, write_bytes, write_byte, write_utf8, to: @io
+    delegate write, write_bytes, write_byte, write_utf8, puts to: @io
 
     def close_chunk
       @io.flush
