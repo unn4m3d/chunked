@@ -1,6 +1,5 @@
 module Chunked
-  class IORange
-    include IO
+  class IORange < IO
     include IO::Positional
 
     @parent : IO::Positional

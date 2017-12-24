@@ -12,8 +12,6 @@ module Chunked
       puts *str if @debug
     end
 
-    alias ChunkPosition = NamedTuple(info: ChunkInfo(T,T), offset: T)
-
     def close
       debug "Closing #{@io.closed?}"
       @io.close unless @io.closed?
