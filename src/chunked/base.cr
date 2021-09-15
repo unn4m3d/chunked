@@ -23,11 +23,11 @@ module Chunked
     end
 
     def offset
-      T.unsafe_cast(@io.pos)
+      T.new(@io.pos)
     end
 
     def offset=(t : T)
-      @io.pos = @io.pos.class.unsafe_cast(t)
+      @io.pos = t
     end
   end
 end

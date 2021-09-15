@@ -6,3 +6,11 @@ end
 class IO::FileDescriptor
   include Positional
 end
+
+class IO::Memory
+  include Positional
+
+  def path
+    "#<#{buffer.address.to_s(16)}>"
+  end
+end

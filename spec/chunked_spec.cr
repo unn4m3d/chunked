@@ -1,28 +1,10 @@
 require "./spec_helper"
 
-describe Int do
-  it "crops" do
-    dword = 0x01020304i32
-    Int8.crop(dword).should eq(0x04)
-  end
-
-  it "expands" do
-    byte = 0x02i8
-    (Int16.expand(byte) | 0x0100).should eq(0x0102)
-  end
-
-  it "can perform unsafe_cast" do
-    short = 0x0203i16
-    (Int32.unsafe_cast(short) | 0x010000).should eq(0x010203)
-    Int8.unsafe_cast(short).should eq(0x03)
-  end
-end
-
 describe Chunked::Writer do
 
 
   it "writes data" do
-    writer = Writer.new(File.open(TMP,"w"), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    writer = Writer.new(tmp_io, debug: ENV.has_key?("CHUNKED_DEBUG"))
     writer.chunk 0i64 do |w|
       w.write_byte 1u8
       w.write_byte 2u8
@@ -37,7 +19,7 @@ describe Chunked::Writer do
 
     writer.close
 
-    File.read(TMP).bytes.should eq([
+    tmp_io.to_slice.to_a.should eq([
       0u8,0u8,0u8,0u8,0u8,0u8,0u8,0u8, # INDEX = 0x0000000000000000
       3u8,0u8,0u8,0u8,0u8,0u8,0u8,0u8, # SIZE = 0x0000000000000003
       1u8,2u8,3u8,     # 3 bytes of data
@@ -49,7 +31,7 @@ describe Chunked::Writer do
   end
 
   it "writes data using other integral types" do
-    writer = Writer32.new(File.open(TMP32,"w"), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    writer = Writer32.new(tmp32_io, debug: ENV.has_key?("CHUNKED_DEBUG"))
     writer.chunk 0u32 do |w|
       w.write_byte 1u8
       w.write_byte 2u8
@@ -64,7 +46,7 @@ describe Chunked::Writer do
 
     writer.close
 
-    File.read(TMP32).bytes.should eq([
+    tmp32_io.to_slice.to_a.should eq([
       0u8,0u8,0u8,0u8, # INDEX = 0x00000000
       3u8,0u8,0u8,0u8, # SIZE = 0x00000003
       1u8,2u8,3u8,     # 3 bytes of data
@@ -79,7 +61,8 @@ end
 
 describe Chunked::Reader do
   it "reads data" do
-    reader = Reader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    tmp_io.rewind
+    reader = Reader.new(tmp_io, debug: ENV.has_key?("CHUNKED_DEBUG"))
     cdata = reader.open_chunk
     cdata.index.should eq(0i64)
     cdata.size.should eq(3i64)
@@ -93,7 +76,8 @@ describe Chunked::Reader do
   end
 
   it "reads data using other integral types" do
-    reader = Reader32.new(File.open(TMP32), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    tmp32_io.rewind
+    reader = Reader32.new(tmp32_io, debug: ENV.has_key?("CHUNKED_DEBUG"))
     cdata = reader.open_chunk
     cdata.index.should eq(0i32)
     cdata.size.should eq(3i32)
@@ -107,7 +91,8 @@ describe Chunked::Reader do
   end
 
   it "reads chunks with blocks" do
-    reader = Reader32.new(File.open(TMP32), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    tmp32_io.rewind
+    reader = Reader32.new(tmp32_io, debug: ENV.has_key?("CHUNKED_DEBUG"))
     reader.chunk do |io|
       io.gets_to_end.bytes.should eq([1u8,2u8,3u8])
     end
@@ -118,7 +103,8 @@ describe Chunked::Reader do
   end
 
   it "iterates through chunks" do
-    reader = Reader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    tmp_io.rewind
+    reader = Reader.new(tmp_io, debug: ENV.has_key?("CHUNKED_DEBUG"))
     reader.each_chunk do |io, chk|
       io.size.should eq(chk.size)
       io.size.should eq(3i64)
@@ -128,9 +114,9 @@ describe Chunked::Reader do
 end
 
 describe Chunked::IndexedReader do
-
   it "indexes chunks" do
-    reader = IReader.new(File.open(TMP), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    tmp_io.rewind
+    reader = IReader.new(tmp_io, debug: ENV.has_key?("CHUNKED_DEBUG"))
     reader.index_chunks!
     reader.info(0i64)[:size].should eq(3)
     reader.info(1i64)[:size].should eq(3)
@@ -139,7 +125,8 @@ describe Chunked::IndexedReader do
   end
 
   it "indexes chunks using other integral types" do
-    reader = IReader32.new(File.open(TMP32), debug: ENV.has_key?("CHUNKED_DEBUG"))
+    tmp32_io.rewind
+    reader = IReader32.new(tmp32_io, debug: ENV.has_key?("CHUNKED_DEBUG"))
     reader.index_chunks!
     reader.info(0i32)[:size].should eq(3)
     reader.info(1i32)[:size].should eq(3)

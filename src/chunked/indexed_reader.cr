@@ -26,7 +26,7 @@ module Chunked
       raise "No chunk #{index} found" unless @chunks.has_key? index
       offset = @chunks[index][:offset]
       size = @chunks[index][:size]
-      IORange.new(@io, UInt64.unsafe_cast(offset), UInt64.unsafe_cast(size))
+      IORange.new(@io, offset.to_u64, size.to_u64)
     end
 
     def info(index : T)

@@ -10,7 +10,7 @@ module Chunked
     getter size
 
     def pos=(t)
-      @pos = UInt64.unsafe_cast(t)
+      @pos = UInt64.new(t)
     end
 
     def pos
@@ -43,7 +43,7 @@ module Chunked
       num
     end
 
-    def write(slice : Bytes)
+    def write(slice : Bytes) : Nil
       if slice.size + @pos > @size
         update_pos!
         @parent.write(slice[0,@size-@pos])
@@ -53,7 +53,7 @@ module Chunked
       update_pos!
       size = @parent.write(slice) || 0
       @pos += size
-      size
+      nil
     end
   end
 end

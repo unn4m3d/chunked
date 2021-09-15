@@ -59,7 +59,7 @@ module Chunked
     def chunk(&block : Proc(IORange, Void))
       cinfo = open_chunk
       begin
-        block.call(IORange.new(@io, UInt64.unsafe_cast(offset), UInt64.unsafe_cast(cinfo.size)))
+        block.call(IORange.new(@io, offset.to_u64, cinfo.size.to_u64))
       ensure
         close_chunk
       end
@@ -69,7 +69,7 @@ module Chunked
       while cinfo = open_chunk?
         begin
           cin = cinfo.not_nil!
-          proc.call(IORange.new(@io, UInt64.unsafe_cast(offset), UInt64.unsafe_cast(cin.size)), cin)
+          proc.call(IORange.new(@io, offset.to_u64, cin.size.to_u64), cin)
         ensure
           close_chunk
         end
